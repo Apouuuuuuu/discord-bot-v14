@@ -12,6 +12,7 @@ const bot = new Client({
 });
 
 bot.commands = new Map();
+bot.lastDeletedMessage = new Map();
 
 // Vérifie si la variable TOKEN est définie
 if (!process.env.TOKEN) {

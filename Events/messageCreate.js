@@ -1,7 +1,37 @@
 const { EmbedBuilder } = require("discord.js");
 
+
+const forbiddenRegex = /\b(n[éeèe3]g[rv]?[o0]s?|b[0o]ugn[0o]u[l1]e?s?)\b/gi;
+
 module.exports = async (bot, message) => {
     if (message.author.bot || message.channel.type === 'dm') return;
+
+    const logChannel = message.guild.channels.cache.get('1345549844852379772'); 
+
+    // --- FILTRE ANTI-RACISME ---
+    if (forbiddenRegex.test(message.content)) {
+        await message.delete().catch(console.error);
+        
+        let warnEmbed = new EmbedBuilder()
+            .setColor("DarkRed")
+            .setTitle("🚨 Message supprimé (Propos interdits)")
+            .addFields(
+                { name: '▶️ Auteur :', value: `\`\`\`${message.author.tag}\`\`\`` },
+                { name: '▶️ Contenu :', value: `\`\`\`${message.content}\`\`\`` },
+                { name: '▶️ Channel :', value: `<#${message.channel.id}>` }
+            )
+            .setTimestamp()
+            .setFooter({ text: bot.user.username, iconURL: bot.user.displayAvatarURL({ dynamic: true }) });
+
+        if (logChannel) {
+            logChannel.send({ embeds: [warnEmbed] }).catch(console.error);
+        } else {
+            console.log("⚠️ Le channel des logs est introuvable !");
+        }
+
+        console.log(`❌ Message supprimé de ${message.author.tag} : "${message.content}"`);
+        return;
+    }
 
     // --- LOG DES MESSAGES ENVOYÉS ---
     let EmbedMsgLogs = new EmbedBuilder()
@@ -15,7 +45,6 @@ module.exports = async (bot, message) => {
         .setTimestamp()
         .setFooter({ text: bot.user.username, iconURL: bot.user.displayAvatarURL({ dynamic: true }) });
 
-    const logChannel = message.guild.channels.cache.get('1345549844852379772'); 
     if (logChannel) {
         logChannel.send({ embeds: [EmbedMsgLogs] }).catch(console.error);
     } else {
@@ -31,7 +60,7 @@ module.exports = async (bot, message) => {
         }
 
         const snipeEmbed = new EmbedBuilder()
-            .setColor("Red")
+            .setColor("Orange")
             .setTitle("💬 Dernier message supprimé")
             .addFields(
                 { name: '▶️ Auteur :', value: `\`\`\`${snipedMessage.author}\`\`\`` },
