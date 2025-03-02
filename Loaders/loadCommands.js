@@ -1,4 +1,3 @@
-// Récupère tous les fichiers dans le dossier Commandes et les charges (avec FS)
 const fs = require('fs');
 
 module.exports = async bot => {
