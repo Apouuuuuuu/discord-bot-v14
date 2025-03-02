@@ -1,85 +1,60 @@
-const Discord = require("discord.js")
+const Discord = require("discord.js");
 
 module.exports = {
-
     name: "clear",
-    description: "Effacer entre 0 et 100 messages",
+    description: "Effacer entre 1 et 100 messages",
     permission: Discord.PermissionFlagsBits.ManageMessages,
     dm: false,
     category: "🔰・Modération",
     options: [
         {
-            type: "number",
+            type: 4, // INTEGER
             name: "nombre",
-            description: "Le nom de message a supprimer",
+            description: "Le nombre de messages à supprimer (entre 1 et 100)",
             required: true,
             autocomplete: false
-        }, {
-            type: "channel",
+        }, 
+        {
+            type: 7, // CHANNEL
             name: "salon",
-            description: "Le salon ou effacer les messages",
+            description: "Le salon où effacer les messages",
             required: false,
             autocomplete: false
         }
     ],
 
-    async run(bot, message, args) {
+    async run(bot, interaction) {
+        let channel = interaction.options.getChannel("salon") || interaction.channel;
+        if (!interaction.guild.channels.cache.get(channel.id)) 
+            return interaction.reply({ content: "Le salon spécifié est invalide !", flags: Discord.MessageFlags.Ephemeral });
 
-        let channel = args.getChannel("salon")
-        if (!channel) channel = message.channel;
-        if (channel.id !== message.channel.id && !message.guild.channels.cache.get(channel.id)) return message.reply("Pas de salon")
+        let number = interaction.options.getInteger("nombre");
+        if (number < 1 || number > 100) 
+            return interaction.reply({ content: "Il faut un nombre entre **1** et **100** !", flags: Discord.MessageFlags.Ephemeral });
 
-        let number = args.getNumber("nombre")
-        if (parseInt(number) <= 0 || parseInt(number) > 100) return message.reply("Il nous faut un nombre entre `0` et `100` inclus !")
-
-        await message.deferReply()
+        await interaction.deferReply({ flags: Discord.MessageFlags.Ephemeral });
 
         try {
-
-            let messages = await channel.bulkDelete(parseInt(number))
-
-
-
-            let EmbedSupprime = new Discord.EmbedBuilder()
-                .setColor(bot.colorModeration)
-                .setTitle("Clear")
+            let deletedMessages = await channel.bulkDelete(number, true);
+            
+            let embedSupprime = new Discord.EmbedBuilder()
+                .setColor("#ff0000")
+                .setTitle("🧹 Messages supprimés")
                 .setThumbnail(bot.user.displayAvatarURL({ dynamic: true }))
-                .setDescription(`\`${messages.size}\` messages ont été suppprimés dans le salon ${channel}.`)
+                .setDescription(`✅ **${deletedMessages.size}** messages ont été supprimés dans ${channel}.`)
                 .setTimestamp()
-                .setFooter({ text: "Clear footer" })
+                .setFooter({ text: "Clear command" });
 
-            const sentMessage = await message.channel.send({ embeds: [EmbedSupprime] });
+            const sentMessage = await interaction.channel.send({ embeds: [embedSupprime] });
 
-            // supprime l'embed après 5 secondes
+            // Supprime l'embed après 5 secondes
             setTimeout(() => {
                 sentMessage.delete();
             }, 5000);
-
-
 
         } catch (err) {
-
-            let messages = [...(await channel.messages.fetch()).filter(msg => !msg.interaction && (Date.now() - msg.createdAt) <= 1209600000).values()]
-            if (messages.length <= 0) return message.followUp("Aucun message à supprimer car ils datent tous de plus de 14 jours !")
-            await channel.bulkDelete(messages)
-
-
-            let Embed = new Discord.EmbedBuilder()
-                .setColor('Red')
-                .setTitle("Clear")
-                .setThumbnail(bot.user.displayAvatarURL({ dynamic: true }))
-                .setDescription(`J'ai pu supprimé uniquement \`${messages.length}\` message(s), car les autres dataient de plus de 14 jours !`)
-                .setTimestamp()
-                .setFooter({ text: "Clear footer" })
-
-            const sentMessage = await message.channel.send({ embeds: [Embed] });
-
-            // supprime l'embed après 5 secondes
-            setTimeout(() => {
-                sentMessage.delete();
-            }, 5000);
-
-
+            console.error(err);
+            return interaction.followUp({ content: "❌ Une erreur est survenue. Vérifie que les messages ont moins de **14 jours**.", flags: Discord.MessageFlags.Ephemeral });
         }
     }
-}
+};

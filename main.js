@@ -11,7 +11,8 @@ const bot = new Client({
     ]
 });
 
-bot.commands = new Map();
+const { Collection } = require("discord.js");
+bot.commands = new Collection();
 bot.lastDeletedMessage = new Map();
 
 // Vérifie si la variable TOKEN est définie
