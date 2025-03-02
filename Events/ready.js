@@ -1,4 +1,5 @@
 const { REST, Routes } = require("discord.js");
+const imageRotation = require("./imageRotation"); // Assure-toi que le chemin est correct
 
 module.exports = async bot => {
     const commands = [...bot.commands.values()].map(command => ({
@@ -13,11 +14,14 @@ module.exports = async bot => {
         console.log("🔄 Mise à jour des slash commands...");
 
         await rest.put(
-            Routes.applicationGuildCommands(bot.user.id, "1292813636405825549"), // ID du serveur
+            Routes.applicationGuildCommands(bot.user.id, "1343890230394093588"), // ID du serveur
             { body: commands }
         );
 
         console.log("✅ Slash commands mises à jour avec succès !");
+
+        // Démarrage de la rotation d'images
+        imageRotation(bot);
     } catch (error) {
         console.error("❌ Erreur lors de l'enregistrement des commandes Slash :", error);
     }
