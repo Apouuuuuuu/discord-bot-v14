@@ -83,6 +83,6 @@ async function rotateImage(bot) {
 }
 
 module.exports = (bot) => {
-    console.log("⏳ Lancement de la rotation d'images toutes les 6h secondes...");
-    setInterval(() => rotateImage(bot), 21600000);
+    console.log("⏳ Lancement de la rotation d'images toutes les 12h");
+    setInterval(() => rotateImage(bot), 43200000 );
 };

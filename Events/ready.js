@@ -1,5 +1,5 @@
 const { REST, Routes } = require("discord.js");
-const imageRotation = require("./imageRotation"); // Assure-toi que le chemin est correct
+const imageRotation = require("./imageRotation"); 
 
 module.exports = async bot => {
     const commands = [...bot.commands.values()].map(command => ({
