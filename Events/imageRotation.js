@@ -1,10 +1,10 @@
 const axios = require("axios");
 
 const IMAGE_CHANNEL_ID = "1345566819909369936"; 
-const GUILD_ID = "1343890230394093588"; // Remplace par l'ID de ton serveur
+const GUILD_ID = "1343890230394093588"; 
 const USED_IMAGES = new Set();
-const MAX_IMAGE_SIZE_MB = 10; // Taille max d'image acceptée par Discord en Mo
-const ALLOWED_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "webp"]; // Formats d'images autorisés
+const MAX_IMAGE_SIZE_MB = 10; 
+const ALLOWED_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "webp"]; 
 
 async function fetchImages(bot) {
     const channel = await bot.channels.fetch(IMAGE_CHANNEL_ID);
@@ -14,14 +14,12 @@ async function fetchImages(bot) {
     }
     console.log(`✅ Salon d'images trouvé : ${channel.name} (${channel.id})`);
 
-    // Récupère jusqu'à 100 messages pour maximiser les images disponibles
     const messages = await channel.messages.fetch({ limit: 100 });
     let images = [];
 
     messages.forEach(msg => {
         if (msg.attachments.size > 0) {
             msg.attachments.forEach(attachment => {
-                // Nettoyer l'URL pour retirer les paramètres (après le '?')
                 const cleanUrl = attachment.url.split('?')[0];
                 const fileExtension = cleanUrl.split('.').pop().toLowerCase();
                 if (ALLOWED_EXTENSIONS.includes(fileExtension) && !USED_IMAGES.has(attachment.url)) {
@@ -54,7 +52,6 @@ async function rotateImage(bot) {
     const image = images[Math.floor(Math.random() * images.length)];
     USED_IMAGES.add(image.url);
 
-    // Vérifier si l'image dépasse la taille autorisée
     if (image.size > MAX_IMAGE_SIZE_MB) {
         console.log(`❌ Image trop lourde (${image.size.toFixed(2)} Mo), ignorée.`);
         try {
@@ -77,6 +74,9 @@ async function rotateImage(bot) {
 
         await guild.setIcon(imageBuffer);
         console.log("✅ Changement de l'icône réussi !");
+
+        await image.message.delete();
+        console.log("🗑️ Message supprimé pour éviter la réutilisation de l'image.");
     } catch (error) {
         console.error("❌ Erreur lors du changement de photo de profil :", error);
     }

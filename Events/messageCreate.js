@@ -14,7 +14,8 @@ module.exports = async (bot, message) => {
             author: message.author.tag,
             content: message.content,
             timestamp: Date.now(),
-            type: "forbidden"
+            type: "forbidden",
+            images: [] 
         });
         
         await message.delete().catch(console.error);
@@ -49,11 +50,20 @@ module.exports = async (bot, message) => {
         
         const snipeEmbed = new EmbedBuilder()
             .setColor('Blue')
-            // .setTitle(name: snipedMessage.author)
             .setAuthor({ name: snipedMessage.author })
-            .setDescription(`\`\`\`${snipedMessage.content || '*Pas de contenu*'}\`\`\``)
+            .setDescription(`\`\`\`${snipedMessage.content ? snipedMessage.content : '*Pas de contenu*'}\`\`\``)
             .setFooter({ text: 'Supprimé le', iconURL: bot.user.displayAvatarURL({ dynamic: true }) })
             .setTimestamp();
+        
+        if (snipedMessage.images && snipedMessage.images.length > 0) {
+            snipeEmbed.setImage(snipedMessage.images[0]);
+            if (snipedMessage.images.length > 1) {
+                const additionalImages = snipedMessage.images.slice(1)
+                    .map(url => `[Voir l'image](${url})`)
+                    .join("\n");
+                snipeEmbed.addFields({ name: '▶️ Autres images', value: additionalImages });
+            }
+        }
         
         message.channel.send({ embeds: [snipeEmbed] }).catch(console.error);
     }

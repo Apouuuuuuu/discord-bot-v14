@@ -23,12 +23,39 @@ module.exports = async (bot, message) => {
         .setTimestamp()
         .setFooter({ text: bot.user.username, iconURL: bot.user.displayAvatarURL({ dynamic: true }) });
 
+    let imageURLs = [];
+
+    if (message.attachments.size > 0) {
+        const allowedExtensions = ["png", "jpg", "jpeg", "gif", "webp"];
+        const imageAttachments = message.attachments.filter(attachment => {
+            const cleanUrl = attachment.url.split('?')[0];
+            const ext = cleanUrl.split('.').pop().toLowerCase();
+            return allowedExtensions.includes(ext);
+        });
+
+        if (imageAttachments.size > 0) {
+            imageURLs = Array.from(imageAttachments.values()).map(att => att.url);
+
+            const firstImage = imageAttachments.first();
+            deletionEmbed.setImage(firstImage.url);
+            deletionEmbed.addFields({ name: '▶️ Image', value: `[Voir l'image](${firstImage.url})` });
+
+            if (imageAttachments.size > 1) {
+                const additionalImages = imageAttachments.filter(att => att.id !== firstImage.id)
+                    .map(att => `[Voir l'image](${att.url})`)
+                    .join("\n");
+                deletionEmbed.addFields({ name: '▶️ Autres images', value: additionalImages });
+            }
+        }
+    }
+
     logChannel.send({ embeds: [deletionEmbed] }).catch(console.error);
 
     bot.lastDeletedMessage.set(message.channel.id, {
         author: message.author.tag,
-        content: message.content || "Aucun contenu",
+        content: message.content,
         timestamp: message.createdTimestamp,
-        type: "user"
+        type: "user",
+        images: imageURLs
     });
 };
