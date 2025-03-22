@@ -10,12 +10,21 @@ module.exports = async (bot, message) => {
     const logChannel = message.guild.channels.cache.get('1345566769829515457');
     
     if (forbiddenRegex.test(message.content)) {
+        const linkRegex = /(https?:\/\/[^\s]+)/g;
+        let links = message.content.match(linkRegex) || [];
+        
+        if (message.attachments.size > 0) {
+            message.attachments.forEach(attachment => {
+                links.push(attachment.url);
+            });
+        }
+        
         bot.lastDeletedMessage.set(message.channel.id, {
             author: message.author.tag,
             content: message.content,
             timestamp: Date.now(),
             type: "forbidden",
-            images: [] 
+            links: links
         });
         
         await message.delete().catch(console.error);
@@ -55,14 +64,11 @@ module.exports = async (bot, message) => {
             .setFooter({ text: 'Supprimé le', iconURL: bot.user.displayAvatarURL({ dynamic: true }) })
             .setTimestamp();
         
-        if (snipedMessage.images && snipedMessage.images.length > 0) {
-            snipeEmbed.setImage(snipedMessage.images[0]);
-            if (snipedMessage.images.length > 1) {
-                const additionalImages = snipedMessage.images.slice(1)
-                    .map(url => `[Voir l'image](${url})`)
-                    .join("\n");
-                snipeEmbed.addFields({ name: '▶️ Autres images', value: additionalImages });
-            }
+        if (snipedMessage.links && snipedMessage.links.length > 0) {
+            const formattedLinks = snipedMessage.links
+                .map(link => `[${link}](${link})`)
+                .join("\n");
+            snipeEmbed.addFields({ name: '▶️ Liens', value: formattedLinks });
         }
         
         message.channel.send({ embeds: [snipeEmbed] }).catch(console.error);
