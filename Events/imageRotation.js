@@ -19,6 +19,13 @@ async function fetchTenorImage(url) {
     } catch (error) {
         console.error("❌ Erreur lors de la récupération de l'image Tenor :", error.message);
     }
+
+    const img = document.getElementById("tenor-preview");
+    if (img) {
+        img.remove();
+        console.log("🗑️ Image supprimée suite à l'échec de récupération.");
+    }
+
     return null;
 }
 
@@ -64,7 +71,7 @@ async function fetchImages(bot) {
                     console.log(`📸 Image détectée (URL direct) : ${url}`);
                     images.push({
                         url: url,
-                        size: 0, // Taille inconnue = valide
+                        size: 0,
                         extension: fileExtension,
                         message: msg
                     });
@@ -154,11 +161,10 @@ module.exports = (bot) => {
     setInterval(() => {
         const now = new Date();
         const currentHour = now.getHours();
-        // Désactiver la rotation entre minuit et 10h
         if (currentHour >= 0 && currentHour < 10) {
             console.log("⏸️ Rotation des images désactivée entre minuit et 10h.");
             return;
         }
         rotateImage(bot);
-    }, 3600000);
+    }, 7200000);
 };
