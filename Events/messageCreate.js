@@ -60,7 +60,7 @@ module.exports = async (bot, message) => {
         const snipeEmbed = new EmbedBuilder()
             .setColor('Blue')
             .setAuthor({ name: snipedMessage.author })
-            .setDescription(`\`\`\`${snipedMessage.content ? snipedMessage.content : '*Pas de contenu*'}\`\`\``)
+            .setDescription(`${snipedMessage.content ? snipedMessage.content : '*Pas de contenu*'}`)
             .setFooter({ text: 'Supprimé le', iconURL: bot.user.displayAvatarURL({ dynamic: true }) })
             .setTimestamp();
         
